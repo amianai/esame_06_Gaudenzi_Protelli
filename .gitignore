@@ -1,0 +1,18 @@
+
+# Environment Variables (Secrets)
+.env
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# System files
+.DS_Store
+
+# User Exclusions
+materiale_esame/

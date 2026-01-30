@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bastian Contrario Chatbot</title>
+    <!-- Link al file CSS locale "shadcn-like" -->
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --muted-foreground: #6b7280;
+        }
+
+        .dark-mode {
+            --bg-color: #111827;
+            --text-color: #f9fafb;
+            --card-bg: #1f2937;
+            --input-bg: #374151;
+            --border-color: #4b5563;
+            --muted-foreground: #9ca3af;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 98% !important;
+            /* Almost full width */
+            height: 100vh;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            /* Vertical padding, small horizontal */
+            box-sizing: border-box;
+        }
+
+        /* Chat Card & Layout updates */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, border-color 0.3s;
+
+            /* Fullscreen behavior */
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 4rem);
+            /* Full height minus margin */
+        }
+
+        #chat-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding-right: 0.5rem;
+            /* Ensure it takes space */
+            min-height: 0;
+        }
+
+        #user-input,
+        #model-select,
+        #temperature {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        /* Theme Toggle Button */
+        #theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            color: var(--text-color);
+        }
+
+        /* Hide logic for elements moved out of controls */
+        .old-controls-removed {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Theme Toggle Removed from Body scope, moved to Header -->
+    <!-- <button id="theme-toggle">🌙/☀️</button> REMOVED -->
+    <div class="container">
+
+        <!-- Chat Card Wrapper (Acting as Main Container) -->
+        <div class="card">
+            <header
+                style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem;">
+                <div>
+                    <h1 style="margin: 0; font-size: 1.5rem;">Bastian Contrario</h1>
+                    <p style="color: var(--muted-foreground); margin: 0; font-size: 0.875rem;">
+                        Il chatbot che non è mai d'accordo con te.
+                    </p>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <!-- Temperature moved to header -->
+                    <div class="slider-container" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label for="temperature" style="margin:0; font-size: 0.875rem;">Polemica:</label>
+                        <input type="range" id="temperature" min="0.1" max="1.5" step="0.1" value="0.8"
+                            style="width: 100px;">
+                        <span id="temp-value" style="font-size: 0.875rem; width: 24px;">0.8</span>
+                    </div>
+
+                    <!-- Reset Button moved to header, destructive style -->
+                    <button id="reset-btn"
+                        style="background: none; border: none; color: #ef4444; cursor: pointer; font-weight: 500;">
+                        Reset
+                    </button>
+
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle"
+                        style="background: none; border: 1px solid var(--border-color); padding: 0.5rem; cursor: pointer; border-radius: 0.375rem; color: var(--text-color);">🌙/☀️</button>
+                </div>
+            </header>
+
+            <!-- Chat Card Content -->
+            <div id="chat-history">
+                <div class="message bot">
+                    Non sperare che io sia gentile con te. Dimmi qualcosa così posso smentirti.
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- Old Temperature Slider Location REMOVED -->
+
+                <!-- Input e Buttons -->
+                <div
+                    style="display: flex; gap: 0.5rem; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <input type="text" id="user-input" placeholder="Scrivi qualcosa di intelligente..."
+                        style="flex-grow: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.375rem; font-size: 1rem;"
+                        autocomplete="off">
+
+                    <select id="model-select"
+                        style="padding: 0.75rem; border-radius: 0.375rem; border: 1px solid var(--border-color); background-color: var(--input-bg); color: var(--text-color);">
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="mistral">Mistral</option>
+                    </select>
+
+                    <button id="send-btn"
+                        style="background-color: var(--text-color); color: var(--bg-color); padding: 0.75rem 1.5rem; border-radius: 0.375rem; cursor: pointer; border: none; font-weight: bold;">Litiga</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Script Vanilla JS (Niente framework) -->
+        <script>
+            // Seleziono gli elementi del DOM
+            const chatHistory = document.getElementById('chat-history');
+            const userInput = document.getElementById('user-input');
+            const modelSelect = document.getElementById('model-select');
+            const sendBtn = document.getElementById('send-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const tempSlider = document.getElementById('temperature');
+            const tempValue = document.getElementById('temp-value');
+
+            // Stato della conversazione (Memoria)
+            let conversationHistory = [];
+
+            // Aggiorno il valore della temperatura quando muovo lo slider
+            tempSlider.addEventListener('input', (e) => {
+                tempValue.textContent = e.target.value;
+            });
+
+            // Funzione per inviare messaggio
+            async function sendMessage() {
+                const text = userInput.value.trim();
+                const temperature = parseFloat(tempSlider.value);
+                const model = modelSelect.value;
+
+                if (!text) return;
+
+
+                // 1. Aggiungo messaggio utente alla chat
+                appendMessage(text, 'user');
+
+                // 2. Aggiungo alla memoria (history) prima di inviare
+                // Nota: Non aggiungo l'ultimo messaggio alla history qui, 
+                // perché il backend si aspetta che l'ultimo messaggio sia nel campo 'text' separato
+                // o gestito come ultimo item. 
+                // In questo design: backend appende 'text' alla history. 
+                // Quindi inviamo conversazione PRECEDENTE come history.
+
+                userInput.value = '';
+
+                // Disabilito input mentre aspetto
+                userInput.disabled = true;
+                sendBtn.disabled = true;
+                sendBtn.textContent = '...';
+
+                try {
+                    // 3. Chiamata fetch al backend FastAPI
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: text,
+                            temperature: temperature,
+                            history: conversationHistory,
+                            model: model
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Errore nella risposta del server');
+                    }
+
+                    const data = await response.json();
+
+                    // 4. Aggiungo risposta del bot alla UI
+                    appendMessage(data.text, 'bot');
+
+                    // 5. Aggiorno la memoria locale per i prossimi turni
+                    conversationHistory.push({ "role": "user", "content": text });
+                    conversationHistory.push({ "role": "assistant", "content": data.text });
+
+                } catch (error) {
+                    appendMessage("Errore: " + error.message, 'bot');
+                } finally {
+                    // Riabilito controlli
+                    userInput.disabled = false;
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Litiga';
+                    userInput.focus();
+                }
+            }
+
+            // Funzione Helper per creare l'HTML del messaggio
+            function appendMessage(text, sender) {
+                const msgDiv = document.createElement('div');
+                msgDiv.classList.add('message', sender);
+                msgDiv.textContent = text;
+                chatHistory.appendChild(msgDiv);
+                // Scroll automatico in basso
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+
+            // Event Listeners
+            sendBtn.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            // Reset della memoria
+            resetBtn.addEventListener('click', () => {
+                conversationHistory = [];
+                chatHistory.innerHTML = '<div class="message bot">Non sperare che io sia gentile con te. Dimmi qualcosa così posso smentirti. (Memoria Cancellata)</div>';
+            });
+
+            // Toggle Theme logic
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+            });
+        </script>
+</body>
+
+</html>
