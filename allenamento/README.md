@@ -22,6 +22,7 @@ Questa è la **v0**: un prototipo da usare per una settimana. Quello che non fun
 - **Storico**: calendario del mese, dettagli del giorno, eliminazione.
 - **Scheda**: fasi e sessioni, con la scheda dettagliata di ogni esercizio.
 - **Impostazioni**: bip e vibrazione a fine timer (spenti di default), backup e ripristino dei dati.
+- **Dati di esempio**: circa 3 mesi simulati da caricare e togliere dalle impostazioni, per vedere l'app dopo un po' di uso. Sono segnati come "esempio" e non toccano i dati veri.
 
 ### Regole della streak
 

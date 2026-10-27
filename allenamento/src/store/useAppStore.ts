@@ -25,8 +25,6 @@ interface PersistedState {
   settings: Settings
   /** Presente quando ci sono i dati di esempio: serve a ripristinare la data d'inizio vera. */
   demo: { previousStartDate: string } | null
-  /** I dati di esempio sono già stati caricati in automatico una volta (solo pagina su claude.ai). */
-  demoSeeded: boolean
 }
 
 interface AppState extends PersistedState {
@@ -55,7 +53,6 @@ function initialState(): PersistedState {
     active: null,
     settings: { sound: false, vibration: false },
     demo: null,
-    demoSeeded: false,
   }
 }
 
@@ -63,6 +60,13 @@ function isBackup(data: unknown): data is PersistedState {
   if (typeof data !== 'object' || data === null) return false
   const d = data as Record<string, unknown>
   return typeof d.startDate === 'string' && Array.isArray(d.entries)
+}
+
+// La versione di prova salvava qui i dati: si riparte da zero.
+try {
+  localStorage.removeItem('allenamento-v0')
+} catch {
+  // Storage non disponibile: niente da pulire.
 }
 
 export const useAppStore = create<AppState>()(
@@ -98,7 +102,7 @@ export const useAppStore = create<AppState>()(
         })
         return true
       },
-      resetAll: () => set({ ...initialState(), demoSeeded: true }),
+      resetAll: () => set(initialState()),
 
       loadDemo: () =>
         set((s) => {
@@ -108,7 +112,6 @@ export const useAppStore = create<AppState>()(
             entries: [...demo.entries, ...s.entries],
             startDate: demo.startDate < s.startDate ? demo.startDate : s.startDate,
             demo: { previousStartDate: s.startDate },
-            demoSeeded: true,
           }
         }),
       clearDemo: () =>
@@ -119,7 +122,7 @@ export const useAppStore = create<AppState>()(
         })),
     }),
     {
-      name: 'allenamento-v0',
+      name: 'allenamento',
       version: 1,
       partialize: (s): PersistedState => ({
         startDate: s.startDate,
@@ -127,7 +130,6 @@ export const useAppStore = create<AppState>()(
         active: s.active,
         settings: s.settings,
         demo: s.demo,
-        demoSeeded: s.demoSeeded,
       }),
     },
   ),
