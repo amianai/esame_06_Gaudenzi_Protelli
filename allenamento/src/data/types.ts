@@ -88,4 +88,6 @@ export interface Entry {
   feeling?: Feeling
   note?: string
   ride?: RideLog
+  /** Registrazione di esempio, non vera. */
+  demo?: boolean
 }

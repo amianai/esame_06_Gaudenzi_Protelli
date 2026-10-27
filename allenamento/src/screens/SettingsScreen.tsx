@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react'
-import { Download, Trash2, Upload } from 'lucide-react'
+import { Download, FlaskConical, Trash2, Upload } from 'lucide-react'
 
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { ScreenHeader } from '@/components/ScreenHeader'
@@ -27,6 +27,9 @@ export function SettingsScreen() {
   const entries = useAppStore((s) => s.entries)
   const importBackup = useAppStore((s) => s.importBackup)
   const resetAll = useAppStore((s) => s.resetAll)
+  const demo = useAppStore((s) => s.demo)
+  const loadDemo = useAppStore((s) => s.loadDemo)
+  const clearDemo = useAppStore((s) => s.clearDemo)
   const fileRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [resetOpen, setResetOpen] = useState(false)
@@ -68,6 +71,23 @@ export function SettingsScreen() {
         <p className="px-1 text-sm text-muted-foreground">
           Lo schermo resta acceso durante l'allenamento, così lo vedi da lontano.
         </p>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase">Dati di esempio</h2>
+        <p className="px-1 text-sm text-muted-foreground">
+          Circa 3 mesi simulati: allenamenti, giri in moto, un freeze, un salto e una settimana persa. Servono a
+          vedere come appare l'app dopo un po' di uso. I tuoi dati veri restano.
+        </p>
+        {demo ? (
+          <Button size="lg" variant="outline" onClick={clearDemo}>
+            <Trash2 /> Togli i dati di esempio
+          </Button>
+        ) : (
+          <Button size="lg" variant="outline" onClick={loadDemo}>
+            <FlaskConical /> Carica 3 mesi di esempio
+          </Button>
+        )}
       </section>
 
       <section className="flex flex-col gap-2">

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+import { buildDemo } from '@/data/demo'
 import type { Entry } from '@/data/types'
 import { todayISO } from '@/lib/dates'
 
@@ -22,6 +23,10 @@ interface PersistedState {
   entries: Entry[]
   active: ActiveSession | null
   settings: Settings
+  /** Presente quando ci sono i dati di esempio: serve a ripristinare la data d'inizio vera. */
+  demo: { previousStartDate: string } | null
+  /** I dati di esempio sono già stati caricati in automatico una volta (solo pagina su claude.ai). */
+  demoSeeded: boolean
 }
 
 interface AppState extends PersistedState {
@@ -34,6 +39,8 @@ interface AppState extends PersistedState {
   setSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void
   importBackup: (data: unknown) => boolean
   resetAll: () => void
+  loadDemo: () => void
+  clearDemo: () => void
 }
 
 function newId(): string {
@@ -47,6 +54,8 @@ function initialState(): PersistedState {
     entries: [],
     active: null,
     settings: { sound: false, vibration: false },
+    demo: null,
+    demoSeeded: false,
   }
 }
 
@@ -85,10 +94,29 @@ export const useAppStore = create<AppState>()(
           entries: data.entries,
           settings: { ...initialState().settings, ...data.settings },
           active: null,
+          demo: null,
         })
         return true
       },
-      resetAll: () => set(initialState()),
+      resetAll: () => set({ ...initialState(), demoSeeded: true }),
+
+      loadDemo: () =>
+        set((s) => {
+          if (s.demo) return {}
+          const demo = buildDemo(todayISO(), s.entries)
+          return {
+            entries: [...demo.entries, ...s.entries],
+            startDate: demo.startDate < s.startDate ? demo.startDate : s.startDate,
+            demo: { previousStartDate: s.startDate },
+            demoSeeded: true,
+          }
+        }),
+      clearDemo: () =>
+        set((s) => ({
+          entries: s.entries.filter((e) => !e.demo),
+          startDate: s.demo?.previousStartDate ?? s.startDate,
+          demo: null,
+        })),
     }),
     {
       name: 'allenamento-v0',
@@ -98,6 +126,8 @@ export const useAppStore = create<AppState>()(
         entries: s.entries,
         active: s.active,
         settings: s.settings,
+        demo: s.demo,
+        demoSeeded: s.demoSeeded,
       }),
     },
   ),

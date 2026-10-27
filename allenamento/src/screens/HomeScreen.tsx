@@ -76,6 +76,8 @@ export function HomeScreen() {
   const active = useAppStore((s) => s.active)
   const startSession = useAppStore((s) => s.startSession)
   const clearActive = useAppStore((s) => s.clearActive)
+  const demo = useAppStore((s) => s.demo)
+  const clearDemo = useAppStore((s) => s.clearDemo)
 
   const [skipKey, setSkipKey] = useState(0)
   const [skipOpen, setSkipOpen] = useState(false)
@@ -127,6 +129,18 @@ export function HomeScreen() {
           </Link>
         </Button>
       </header>
+
+      {demo && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-accent/50 px-4 py-3 text-sm">
+          <p>
+            <span className="font-semibold text-accent">Dati di esempio.</span> 3 mesi simulati per vedere
+            l'app in uso.
+          </p>
+          <Button size="sm" variant="outline" onClick={clearDemo}>
+            Togli
+          </Button>
+        </div>
+      )}
 
       {flash && (
         <div className="rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-medium text-primary">

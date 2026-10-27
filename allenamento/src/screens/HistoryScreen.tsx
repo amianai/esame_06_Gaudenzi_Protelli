@@ -84,7 +84,14 @@ function EntryCard({ entry, onDelete }: { entry: Entry; onDelete: () => void }) 
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="font-semibold">{title}</p>
+        <p className="font-semibold">
+          {title}
+          {entry.demo && (
+            <span className="ml-2 rounded border border-dashed border-accent/50 px-1.5 py-0.5 text-[11px] font-medium text-accent">
+              esempio
+            </span>
+          )}
+        </p>
         {details.length > 0 && <p className="text-sm text-muted-foreground">{details.join(' · ')}</p>}
         {entry.note && <p className="mt-1 text-sm italic">“{entry.note}”</p>}
       </div>
