@@ -16,6 +16,8 @@ export interface Settings {
   /** Bip a fine timer. Spento di default: mentre ti alleni ascolti i tuoi podcast. */
   sound: boolean
   vibration: boolean
+  /** Durante l'esercizio l'omino è grande e il tempo piccolo (si sceglie toccando l'angolo). */
+  figureBig: boolean
 }
 
 interface PersistedState {
@@ -51,7 +53,7 @@ function initialState(): PersistedState {
     startDate: todayISO(),
     entries: [],
     active: null,
-    settings: { sound: false, vibration: false },
+    settings: { sound: false, vibration: false, figureBig: false },
     demo: null,
   }
 }

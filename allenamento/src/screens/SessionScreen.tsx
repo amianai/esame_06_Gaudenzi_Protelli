@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import confetti from 'canvas-confetti'
-import { Check, Flame, Info, Pause, Play, Plus, SkipBack, SkipForward, X } from 'lucide-react'
+import { Check, Flame, Info, Maximize2, Pause, Play, Plus, SkipBack, SkipForward, X } from 'lucide-react'
 import { Navigate, useBlocker, useNavigate } from 'react-router'
 
 import { CategoryBadge } from '@/components/CategoryBadge'
@@ -56,9 +56,29 @@ function useCountdown(totalSec: number, paused: boolean, onEnd: () => void) {
   return { remainingSec: remainingMs / 1000, progress: 1 - remainingMs / (totalSec * 1000), addSeconds }
 }
 
-function BigNumber({ children, className }: { children: ReactNode; className?: string }) {
+const NUMBER_SIZE = {
+  sm: 'text-5xl',
+  md: 'text-[clamp(5rem,26vw,8.5rem)]',
+  lg: 'text-[clamp(6rem,34vw,11rem)]',
+}
+
+function BigNumber({
+  children,
+  size = 'lg',
+  className,
+}: {
+  children: ReactNode
+  size?: keyof typeof NUMBER_SIZE
+  className?: string
+}) {
   return (
-    <div className={cn('font-display text-[clamp(5rem,26vw,8.5rem)] leading-[0.85] font-extrabold tabular', className)}>
+    <div
+      className={cn(
+        'font-display leading-[0.85] font-extrabold tabular',
+        NUMBER_SIZE[size],
+        className,
+      )}
+    >
       {children}
     </div>
   )
@@ -81,6 +101,41 @@ function WorkView({
   const timed = step.seconds !== undefined
   const countdown = useCountdown(step.seconds ?? 0, paused || !timed, onDone)
   const color = CATEGORIES[exercise.category].color
+  const figureBig = useAppStore((s) => s.settings.figureBig)
+  const setSetting = useAppStore((s) => s.setSetting)
+
+  const figure = (className: string) => (
+    <ExerciseFigure
+      exerciseId={exercise.id}
+      variant="picto"
+      paused={paused}
+      label={`Omino che fa: ${exercise.name}`}
+      className={className}
+    />
+  )
+
+  const counter = (small: boolean) =>
+    timed ? (
+      <div className="flex w-full flex-col items-center">
+        <BigNumber size={small ? 'sm' : 'lg'} className={cn(paused && 'opacity-40')}>
+          {formatClock(countdown.remainingSec)}
+        </BigNumber>
+        <div className={cn('w-full overflow-hidden rounded-full bg-secondary', small ? 'mt-2 h-1.5' : 'mt-3 h-3')}>
+          <div
+            className="h-full rounded-full transition-[width] duration-200 ease-linear"
+            style={{ width: `${Math.min(100, countdown.progress * 100)}%`, backgroundColor: color }}
+          />
+        </div>
+        {paused && !small && <p className="mt-1 text-lg text-muted-foreground uppercase">In pausa</p>}
+      </div>
+    ) : (
+      <div className="flex items-baseline gap-2">
+        <BigNumber size={small ? 'sm' : 'lg'}>{step.reps}</BigNumber>
+        <span className={cn('font-display font-semibold text-muted-foreground uppercase', small ? 'text-lg' : 'text-3xl')}>
+          rip.{exercise.perSide && ' per lato'}
+        </span>
+      </div>
+    )
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -99,34 +154,22 @@ function WorkView({
         <p className="mt-1 font-display text-3xl font-bold text-accent uppercase">Lato {step.side}</p>
       )}
 
-      <ExerciseFigure
-        exerciseId={exercise.id}
-        variant="picto"
-        paused={paused}
-        label={`Omino che fa: ${exercise.name}`}
-        className="min-h-[140px] w-full flex-1 py-2"
-      />
-
-      <div className="flex flex-col items-center pb-3">
-        {timed ? (
-          <>
-            <BigNumber className={cn(paused && 'opacity-40')}>{formatClock(countdown.remainingSec)}</BigNumber>
-            <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-secondary">
-              <div
-                className="h-full rounded-full transition-[width] duration-200 ease-linear"
-                style={{ width: `${Math.min(100, countdown.progress * 100)}%`, backgroundColor: color }}
-              />
-            </div>
-            {paused && <p className="mt-1 text-lg text-muted-foreground uppercase">In pausa</p>}
-          </>
-        ) : (
-          <div className="flex items-baseline gap-3">
-            <BigNumber>{step.reps}</BigNumber>
-            <span className="font-display text-3xl font-semibold text-muted-foreground uppercase">
-              rip.{exercise.perSide && ' per lato'}
-            </span>
-          </div>
-        )}
+      {/* Una cosa in grande al centro, l'altra piccola nell'angolo: toccando l'angolo si scambiano. */}
+      <div className="flex min-h-0 flex-1 flex-col py-2">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+          {figureBig ? figure('h-full max-h-full w-full') : counter(false)}
+        </div>
+        <div className="flex justify-end pt-2">
+          <button
+            type="button"
+            onClick={() => setSetting('figureBig', !figureBig)}
+            aria-label={figureBig ? 'Ingrandisci il tempo' : "Ingrandisci l'omino"}
+            className="relative flex h-28 w-[44%] items-center justify-center overflow-hidden rounded-xl border bg-card px-3 transition-colors active:bg-secondary"
+          >
+            {figureBig ? counter(true) : figure('h-full w-full')}
+            <Maximize2 className="absolute top-2 right-2 size-4 text-muted-foreground" />
+          </button>
+        </div>
       </div>
 
       <button
@@ -180,7 +223,7 @@ function RestView({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex flex-col items-center pt-2">
         <p className="font-display text-3xl font-bold tracking-wide text-muted-foreground uppercase">{step.label}</p>
-        <BigNumber className={cn('text-primary', paused && 'opacity-40')}>
+        <BigNumber size="md" className={cn('text-primary', paused && 'opacity-40')}>
           {formatClock(countdown.remainingSec)}
         </BigNumber>
         <Progress value={(1 - countdown.progress) * 100} className="mt-3 h-3" />
