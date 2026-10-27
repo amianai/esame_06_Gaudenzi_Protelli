@@ -77,9 +77,12 @@ export function SettingsScreen() {
           {formatLong(startDate).toLowerCase()}). Fai un backup ogni tanto: servirà anche quando l'app
           cambierà indirizzo.
         </p>
-        <Button size="lg" variant="outline" onClick={download}>
-          <Download /> Scarica backup
-        </Button>
+        {/* Nella pagina su claude.ai i download sono bloccati. */}
+        {import.meta.env.MODE !== 'artifact' && (
+          <Button size="lg" variant="outline" onClick={download}>
+            <Download /> Scarica backup
+          </Button>
+        )}
         <Button size="lg" variant="outline" onClick={() => fileRef.current?.click()}>
           <Upload /> Carica backup
         </Button>
