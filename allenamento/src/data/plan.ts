@@ -1,4 +1,4 @@
-import type { Plan } from './types'
+import type { Plan, Session } from './types'
 
 /**
  * SCHEDA DI ESEMPIO, da sostituire con quella vera.
@@ -149,6 +149,61 @@ export const PLAN: Plan = {
   ],
 }
 
+/** Un giro veloce di tutti gli esercizi, per vedere gli omini. Non conta per la streak. */
+export const PRACTICE: Session = {
+  id: 'prova',
+  name: 'Prova: tutti gli esercizi',
+  focus: 'Un giro veloce di tutti i 21 esercizi, per vedere come si fanno',
+  practice: true,
+  blocks: [
+    {
+      title: 'Stretching',
+      rounds: 1,
+      restBetweenItems: 6,
+      restAfter: 6,
+      items: ['s1', 's2', 's3', 's5', 's7', 's8'].map((exerciseId) => ({ exerciseId, seconds: 8 })),
+    },
+    {
+      title: 'Mobilità',
+      rounds: 1,
+      restBetweenItems: 6,
+      restAfter: 6,
+      items: [
+        { exerciseId: 'm1', seconds: 8 },
+        { exerciseId: 'm2', reps: 4 },
+        { exerciseId: 'm3', reps: 3 },
+        { exerciseId: 'm5', reps: 3 },
+        { exerciseId: 'm7', reps: 4 },
+      ],
+    },
+    {
+      title: 'Enduro',
+      rounds: 1,
+      restBetweenItems: 6,
+      restAfter: 6,
+      items: [
+        { exerciseId: 'e1', seconds: 8 },
+        { exerciseId: 'e2', seconds: 8 },
+        { exerciseId: 'e3', seconds: 8 },
+        { exerciseId: 'e11', seconds: 8 },
+        { exerciseId: 'e12', reps: 3 },
+      ],
+    },
+    {
+      title: 'Flex',
+      rounds: 1,
+      restBetweenItems: 6,
+      items: [
+        { exerciseId: 'f1', reps: 5 },
+        { exerciseId: 'f6', reps: 4 },
+        { exerciseId: 'f8', seconds: 8 },
+        { exerciseId: 'f9', reps: 4 },
+        { exerciseId: 'f11', seconds: 8 },
+      ],
+    },
+  ],
+}
+
 export function getSession(id: string) {
-  return PLAN.sessions.find((s) => s.id === id)
+  return id === PRACTICE.id ? PRACTICE : PLAN.sessions.find((s) => s.id === id)
 }

@@ -103,3 +103,94 @@
 .safe-bottom {
   padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
 }
+
+/* Omino degli esercizi (src/lib/figure): le forme arrivano già pronte, qui solo i colori. */
+.figure {
+  --figure-bg: var(--background);
+}
+.bg-card .figure {
+  --figure-bg: var(--card);
+}
+.bg-popover .figure {
+  --figure-bg: var(--popover);
+}
+.fig-near {
+  fill: var(--primary);
+}
+.fig-far {
+  fill: #5d7614;
+}
+.fig-cut {
+  fill: var(--figure-bg);
+}
+.fig-shadow {
+  fill: var(--primary);
+  opacity: 0.14;
+}
+.fig-moto {
+  stroke: var(--accent);
+}
+.fig-prop {
+  stroke: #5c5c5c;
+}
+.fig-prop-fill {
+  fill: #5c5c5c;
+}
+.fig-ground {
+  stroke: var(--border);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+.fig-line :is(line, circle),
+.fig-ghost :is(line, circle) {
+  fill: none;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.fig-line :is(line, circle) {
+  stroke: var(--foreground);
+  stroke-width: 3px;
+}
+.fig-ghost :is(line, circle) {
+  stroke: var(--primary);
+  stroke-width: 2px;
+}
+.fig-ghost-1 {
+  opacity: 0.12;
+}
+.fig-ghost-2 {
+  opacity: 0.2;
+}
+.fig-ghost-3 {
+  opacity: 0.3;
+}
+.fig-joint {
+  fill: var(--figure-bg);
+  stroke: var(--primary);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+.fig-trace {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 1.5px;
+  stroke-dasharray: 3 4;
+  opacity: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+.fig-arc {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+.fig-num,
+.fig-phase {
+  fill: var(--primary);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.fig-phase {
+  font-weight: 800;
+  text-transform: uppercase;
+}

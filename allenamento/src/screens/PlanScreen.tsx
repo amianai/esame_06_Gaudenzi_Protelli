@@ -1,20 +1,26 @@
 import { useState } from 'react'
-import { ChevronRight, Clock, Info } from 'lucide-react'
+import { ChevronRight, Clock, Info, Play } from 'lucide-react'
+import { useNavigate } from 'react-router'
 
 import { CategoryDot } from '@/components/CategoryBadge'
 import { ExerciseSheet } from '@/components/ExerciseSheet'
 import { ScreenHeader } from '@/components/ScreenHeader'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { getExercise } from '@/data/exercises'
-import { PLAN } from '@/data/plan'
+import { PLAN, PRACTICE } from '@/data/plan'
 import type { Exercise } from '@/data/types'
 import { useStats } from '@/lib/hooks'
 import { buildSteps, estimateDurationSec, targetLabel } from '@/lib/session'
 import { cn } from '@/lib/utils'
+import { useAppStore } from '@/store/useAppStore'
 
 export function PlanScreen() {
   const { stats } = useStats()
   const [info, setInfo] = useState<Exercise | null>(null)
+  const navigate = useNavigate()
+  const startSession = useAppStore((s) => s.startSession)
+  const busy = useAppStore((s) => s.active !== null)
 
   const phases = PLAN.phases.map((phase, index) => {
     const from = 1 + PLAN.phases.slice(0, index).reduce((sum, p) => sum + p.weeks, 0)
@@ -35,6 +41,28 @@ export function PlanScreen() {
           </p>
         </div>
       )}
+
+      <Card className="gap-3">
+        <CardHeader>
+          <div className="font-display text-2xl leading-none font-bold uppercase">Prova tutti gli esercizi</div>
+          <p className="text-sm text-muted-foreground">
+            I 21 esercizi in fila, pochi secondi l'uno, per vedere come si fanno. Non conta per la streak.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Button
+            size="lg"
+            className="w-full"
+            disabled={busy}
+            onClick={() => {
+              startSession(PRACTICE.id, false)
+              navigate('/sessione')
+            }}
+          >
+            <Play className="fill-current" /> {busy ? 'Finisci prima l\'allenamento in corso' : 'Inizia la prova'}
+          </Button>
+        </CardContent>
+      </Card>
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase">Fasi</h2>

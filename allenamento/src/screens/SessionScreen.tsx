@@ -5,6 +5,7 @@ import { Navigate, useBlocker, useNavigate } from 'react-router'
 
 import { CategoryBadge } from '@/components/CategoryBadge'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { ExerciseFigure } from '@/components/ExerciseFigure'
 import { ExerciseSheet } from '@/components/ExerciseSheet'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -57,12 +58,7 @@ function useCountdown(totalSec: number, paused: boolean, onEnd: () => void) {
 
 function BigNumber({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div
-      className={cn(
-        'font-display text-[clamp(8rem,42vw,13rem)] leading-[0.85] font-extrabold tabular',
-        className,
-      )}
-    >
+    <div className={cn('font-display text-[clamp(5rem,26vw,8.5rem)] leading-[0.85] font-extrabold tabular', className)}>
       {children}
     </div>
   )
@@ -96,32 +92,40 @@ function WorkView({
         </span>
       </div>
 
-      <h1 className="mt-3 font-display text-[clamp(2.75rem,13vw,4.75rem)] leading-[0.92] font-extrabold uppercase">
+      <h1 className="mt-2 font-display text-[clamp(2.25rem,10vw,3.75rem)] leading-[0.92] font-extrabold uppercase">
         {exercise.name}
       </h1>
       {step.side && (
         <p className="mt-1 font-display text-3xl font-bold text-accent uppercase">Lato {step.side}</p>
       )}
 
-      <div className="flex flex-1 flex-col items-center justify-center py-4">
+      <ExerciseFigure
+        exerciseId={exercise.id}
+        variant="picto"
+        paused={paused}
+        label={`Omino che fa: ${exercise.name}`}
+        className="min-h-[140px] w-full flex-1 py-2"
+      />
+
+      <div className="flex flex-col items-center pb-3">
         {timed ? (
           <>
             <BigNumber className={cn(paused && 'opacity-40')}>{formatClock(countdown.remainingSec)}</BigNumber>
-            <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-secondary">
+            <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-secondary">
               <div
                 className="h-full rounded-full transition-[width] duration-200 ease-linear"
                 style={{ width: `${Math.min(100, countdown.progress * 100)}%`, backgroundColor: color }}
               />
             </div>
-            <p className="mt-2 text-lg text-muted-foreground uppercase">{paused ? 'In pausa' : 'secondi'}</p>
+            {paused && <p className="mt-1 text-lg text-muted-foreground uppercase">In pausa</p>}
           </>
         ) : (
-          <>
+          <div className="flex items-baseline gap-3">
             <BigNumber>{step.reps}</BigNumber>
-            <p className="mt-1 font-display text-3xl font-semibold text-muted-foreground uppercase">
-              ripetizioni{exercise.perSide && ' per lato'}
-            </p>
-          </>
+            <span className="font-display text-3xl font-semibold text-muted-foreground uppercase">
+              rip.{exercise.perSide && ' per lato'}
+            </span>
+          </div>
         )}
       </div>
 
@@ -131,7 +135,7 @@ function WorkView({
       >
         <div className="flex-1 space-y-1.5 text-sm">
           <ul className="space-y-0.5 text-muted-foreground">
-            {exercise.cues.slice(0, 3).map((cue) => (
+            {exercise.cues.slice(0, 2).map((cue) => (
               <li key={cue}>· {cue}</li>
             ))}
           </ul>
@@ -174,26 +178,34 @@ function RestView({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <p className="font-display text-4xl font-bold tracking-wide text-muted-foreground uppercase">
-          {step.label}
-        </p>
+      <div className="flex flex-col items-center pt-2">
+        <p className="font-display text-3xl font-bold tracking-wide text-muted-foreground uppercase">{step.label}</p>
         <BigNumber className={cn('text-primary', paused && 'opacity-40')}>
           {formatClock(countdown.remainingSec)}
         </BigNumber>
-        <Progress value={(1 - countdown.progress) * 100} className="mt-4 h-3" />
+        <Progress value={(1 - countdown.progress) * 100} className="mt-3 h-3" />
       </div>
 
-      {next && (
-        <div className="mb-4 rounded-xl border bg-card p-4">
-          <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">Prossimo</p>
-          <CategoryBadge category={next.exercise.category} />
-          <p className="mt-2 font-display text-4xl leading-none font-bold uppercase">{next.exercise.name}</p>
-          <p className="mt-1 text-lg text-muted-foreground">
+      {next ? (
+        <div className="my-4 flex min-h-0 flex-1 flex-col rounded-xl border bg-card p-4">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Prossimo</p>
+            <CategoryBadge category={next.exercise.category} />
+          </div>
+          <p className="mt-2 font-display text-3xl leading-none font-bold uppercase">{next.exercise.name}</p>
+          <p className="mt-1 text-muted-foreground">
             {targetLabel(next)}
             {next.side && ` · lato ${next.side}`}
           </p>
+          <ExerciseFigure
+            exerciseId={next.exercise.id}
+            variant="coach"
+            label={`Schema di: ${next.exercise.name}`}
+            className="mt-2 min-h-[140px] w-full flex-1"
+          />
         </div>
+      ) : (
+        <div className="flex-1" />
       )}
 
       <div className="grid grid-cols-[auto_1fr] gap-3">
@@ -311,6 +323,7 @@ export function SessionScreen() {
   const [exitOpen, setExitOpen] = useState(false)
   const [userPaused, setUserPaused] = useState(false)
   const [info, setInfo] = useState<Exercise | null>(null)
+  const [practiceDone, setPracticeDone] = useState(false)
   const leavingRef = useRef(false)
 
   const session = active ? getSession(active.sessionId) : undefined
@@ -331,6 +344,8 @@ export function SessionScreen() {
       </div>
     )
   }
+  // Finita la prova si torna alla home col messaggio: niente secondo reindirizzamento che lo cancelli.
+  if (practiceDone) return null
   if (!active || !session || steps.length === 0) return <Navigate to="/" replace />
 
   const index = Math.min(active.stepIndex, steps.length - 1)
@@ -346,6 +361,14 @@ export function SessionScreen() {
   }
 
   const finish = () => {
+    if (session.practice) {
+      // la prova serve solo a vedere gli esercizi: non va nello storico e non conta per la streak
+      leavingRef.current = true
+      setPracticeDone(true)
+      clearActive()
+      navigate('/', { replace: true, state: { flash: 'Prova finita: non conta per la streak.' } })
+      return
+    }
     const entry = addEntry({
       type: mini ? 'mini' : 'workout',
       date: today,

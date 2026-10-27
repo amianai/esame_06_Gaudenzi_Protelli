@@ -1,6 +1,7 @@
 import { ExternalLink } from 'lucide-react'
 
 import { CategoryBadge } from '@/components/CategoryBadge'
+import { ExerciseFigure } from '@/components/ExerciseFigure'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -33,6 +34,12 @@ export function ExerciseSheet({
                 {exercise.perSide && ' · per lato'}
               </DialogDescription>
             </DialogHeader>
+            <ExerciseFigure
+              exerciseId={exercise.id}
+              variant="coach"
+              label={`Schema di: ${exercise.name}`}
+              className="aspect-[4/3] w-full rounded-lg border"
+            />
             <div>
               <h3 className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 Come si fa
